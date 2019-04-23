@@ -1,0 +1,20 @@
+[core]
+	excludesfile = ~/.gitignore
+	autocrlf = input
+[difftool "kdiff3"]
+	path = /usr/bin/kdiff3
+	trustExitCode = false
+[difftool]
+	prompt = false
+[diff]
+	tool = kdiff3
+[mergetool "kdiff3"]
+	path = /usr/bin/kdiff3
+	trustExitCode = false
+	keepBackup = false
+[mergetool]
+	keepBackup = false
+[merge]
+	tool = kdiff3
+[rerere]
+	enabled = true
