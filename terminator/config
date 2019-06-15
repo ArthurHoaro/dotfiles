@@ -1,0 +1,73 @@
+[global_config]
+  sticky = True
+  enabled_plugins = LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler
+  suppress_multiple_term_dialog = True
+  title_transmit_bg_color = "#d30102"
+  focus = system
+[keybindings]
+  copy = <Primary><Shift>c
+  paste = <Control><Shift>v
+[profiles]
+  [[default]]
+    audible_bell = True
+    # cursor_color = "#aaaaaa"
+    font = Fira Code 11
+    scrollback_lines = 0
+    scrollback_infinite = True
+    use_system_font = False
+    palette = "#073642:#dc322f:#859900:#b58900:#268bd2:#d33682:#2aa198:#eee8d5:#586e75:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
+    foreground_color = "#eee8d5"
+    background_color = "#002b36"
+    cursor_color = "#eee8d5"
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+  [[triplette]]
+    [[[child0]]]
+      fullscreen = False
+      last_active_term = 22ed6dc7-340a-444c-8172-dd81188f1205
+      last_active_window = True
+      maximised = True
+      order = 0
+      parent = ""
+      position = 3841:46
+      size = 1919, 1006
+      title = arthur@fondation: ~
+      type = Window
+    [[[child1]]]
+      order = 0
+      parent = child0
+      position = 957
+      ratio = 0.5
+      type = HPaned
+    [[[child3]]]
+      order = 1
+      parent = child1
+      position = 500
+      ratio = 0.499502982107
+      type = VPaned
+    [[[terminal2]]]
+      order = 0
+      parent = child1
+      profile = default
+      type = Terminal
+      uuid = 22ed6dc7-340a-444c-8172-dd81188f1205
+    [[[terminal4]]]
+      order = 0
+      parent = child3
+      profile = default
+      type = Terminal
+      uuid = fb9febb0-330f-4e71-812d-562b8aacbe63
+    [[[terminal5]]]
+      order = 1
+      parent = child3
+      profile = default
+      type = Terminal
+      uuid = f22ad1df-3e89-4c2b-b323-d7c94185b9cb
+[plugins]
+

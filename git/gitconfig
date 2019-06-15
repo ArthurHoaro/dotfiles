@@ -1,20 +1,24 @@
 [core]
-	excludesfile = ~/.gitignore
-	autocrlf = input
+  excludesfile = ~/.gitignore
+  autocrlf = input
 [difftool "kdiff3"]
-	path = /usr/bin/kdiff3
-	trustExitCode = false
+  path = /usr/bin/kdiff3
+  trustExitCode = false
 [difftool]
-	prompt = false
+  prompt = false
 [diff]
-	tool = kdiff3
+  tool = kdiff3
 [mergetool "kdiff3"]
-	path = /usr/bin/kdiff3
-	trustExitCode = false
-	keepBackup = false
+  path = /usr/bin/kdiff3
+  trustExitCode = false
+  keepBackup = false
 [mergetool]
-	keepBackup = false
+  keepBackup = false
 [merge]
-	tool = kdiff3
+  tool = kdiff3
+[push]
+  default = current
 [rerere]
-	enabled = true
+  enabled = true
+[include]
+  path = ~/.dotfiles/git/gitconfig.local
