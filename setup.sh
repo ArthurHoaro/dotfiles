@@ -18,7 +18,7 @@ ask_for_confirmation() {
 }
 
 execute() {
-  # $1 &> /dev/null
+  $1 &> /dev/null
   echo $1
   print_result $? "${2:-$1}"
 }
@@ -53,39 +53,56 @@ print_success() {
 }
 
 # dotfiles directory
-dir=~/dotfiles
+dir=~/.dotfiles
 # old dotfiles backup directory
-dir_backup=~/dotfiles_old
+dir_backup=~/.dotfiles_old
+
+# Install default packages if asked
+read -p "Do you want to install default packages? [y/n]" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    ${BASH_SOURCE%/*}/init.sh
+fi
 
 # Create dotfiles_old in homedir
-echo -n "Creating $dir_backup for backup of any existing dotfiles in ~..."
-mkdir -p $dir_backup
-echo "done"
+if [ ! -d $dir_backup ]; then
+  echo -n "Creating $dir_backup for backup of any existing dotfiles in ~... "
+  mkdir -p $dir_backup
+  echo "done"
+fi
 
 # Change to the dotfiles directory
-echo -n "Changing to the $dir directory..."
+echo -n "Changing to the $dir directory... "
 cd $dir
 echo "done"
 
-declare -a FILES_TO_SYMLINK=(
+declare -A FILES_TO_SYMLINK=(
 
-  'git/gitconfig'
-  'git/gitignore'
+  ['.gitconfig']='git/gitconfig'
+  ['.gitignore']='git/gitignore'
+  ['.zshrc']='zsh/zshrc'
+  ['.config/terminator/config']='terminator/config'
 
 )
+
+# for key in ${!FILES_TO_SYMLINK[@]}; do
+#     echo ${key} ${FILES_TO_SYMLINK[${key}]}
+# done
+# exit
 
 # Move any existing dotfiles in homedir to dotfiles_old directory,
 # then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
 
-for i in ${FILES_TO_SYMLINK[@]}; do
+for key in ${!FILES_TO_SYMLINK[@]}; do
   echo "Moving any existing dotfiles from ~ to $dir_backup"
-  execute "mv ~/.${i##*/} ~/dotfiles_old/"
+  execute "mv ~/${key} ${dir_backup}"
 done
 
-for i in ${FILES_TO_SYMLINK[@]}; do
-
-  sourceFile="$(pwd)/$i"
-  targetFile="$HOME/.$(printf "%s" "$i" | sed "s/.*\/\(.*\)/\1/g")"
+for key in ${!FILES_TO_SYMLINK[@]}; do
+  echo "coucou"
+  sourceFile="${dir}/${FILES_TO_SYMLINK[${key}]}"
+  targetFile="$HOME/${key}"
 
   if [ ! -e "$targetFile" ]; then
     execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
@@ -100,5 +117,4 @@ for i in ${FILES_TO_SYMLINK[@]}; do
       print_error "$targetFile → $sourceFile"
     fi
   fi
-
 done

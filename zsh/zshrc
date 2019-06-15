@@ -1,11 +1,12 @@
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/arthur/.oh-my-zsh
+export ZSH=/home/arthur/.oh-my-zsh
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="robbyrussell"
+#ZSH_THEME="robbyrussell"
+ZSH_THEME="agnoster"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -49,16 +50,17 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git, symfony2, ruby, rails)
+plugins=(git symfony2 cakephp3 composer dnf docker docker-compose dotenv yarn postgres)
 
 # User configuration
 
-export PATH="/usr/lib64/qt-3.3/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/home/arthur/.local/bin:/home/arthur/bin:/home/arthur/scripts:/home/arthur/.gem/ruby/2.3.0/bin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+export PATH="${PATH}:/home/arthur/.local/bin:/home/arthur/bin:/home/arthur/scripts"
 export PATH="${PATH}:/home/arthur/.config/yarn/global/node_modules/.bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
-source /usr/share/fzf/shell/key-bindings.zsh
+source ~/installs/key-bindings.zsh
 #source /usr/share/fzf/completion.zsh
 
 # You may need to manually set your language environment
@@ -86,15 +88,17 @@ source /usr/share/fzf/shell/key-bindings.zsh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk/jre
-export LD_LIBRARY_PATH=/usr/lib64/nvidia:${LD_LIBRARY_PATH}
+# Moved that to local file
+# export JAVA_HOME=/usr/lib/jvm/java-8-openjdk/jre
+# export LD_LIBRARY_PATH=/usr/lib64/nvidia:${LD_LIBRARY_PATH}
+
+export DEFAULT_USER=arthur
 
 #export WORKON_HOME=~/pyenvs
 #source /usr/bin/virtualenvwrapper.sh
 alias gst='git status'
 alias git='git '
 alias poule=pull
-
 
 # added by travis gem
 [ -f /home/arthur/.travis/travis.sh ] && source /home/arthur/.travis/travis.sh
@@ -104,11 +108,25 @@ dockerin() {
 }
 alias dockerin=dockerin
 
+dockerinsh() {
+    docker exec -i -t $1 sh
+}
+alias dockerinsh=dockerinsh
+
 #alias yarn=nodejs-yarn
+alias cat=bat
+alias catp=bat -p
 alias ping="prettyping --nolegend"
 alias preview="fzf --preview 'bat --color \"always\" {}'"
 alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
 alias yrb="yarn run build"
 alias yrd="yarn run dev"
-alias up="sudo dnf update"
+alias yrs="yarn run serve"
 
+if [ -f /etc/lsb-release ]; then
+  alias up="sudo apt-get update && sudo apt-get upgrade"
+elif [ -f /etc/redhat-release ]; then
+  alias up="sudo dnf update"
+fi
+
+source ~/.dotfiles/zsh/zshrc.local
