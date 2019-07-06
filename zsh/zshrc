@@ -129,4 +129,9 @@ elif [ -f /etc/redhat-release ]; then
   alias up="sudo dnf update"
 fi
 
+if hash ifconfig 2>/dev/null; then
+else
+  alias ifconfig="ip -c a"
+fi
+
 source ~/.dotfiles/zsh/zshrc.local
