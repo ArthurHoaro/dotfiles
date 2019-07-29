@@ -19,6 +19,10 @@
   tool = kdiff3
 [push]
   default = current
+[pull]
+  default = matching
+[branch]
+  autoSetupMerge = always
 [rerere]
   enabled = true
 [include]
