@@ -105,15 +105,15 @@ alias poule=pull
 # added by travis gem
 [ -f /home/arthur/.travis/travis.sh ] && source /home/arthur/.travis/travis.sh
 
-dockerin() {
+f_dockerin() {
     docker exec -i -t $1 bash
 }
-alias dockerin=dockerin
+alias dockerin=f_dockerin
 
-dockerinsh() {
+f_dockerinsh() {
     docker exec -i -t $1 sh
 }
-alias dockerinsh=dockerinsh
+alias dockerinsh=f_dockerinsh
 
 #alias yarn=nodejs-yarn
 alias cat=bat
@@ -137,3 +137,10 @@ else
 fi
 
 source ~/.dotfiles/zsh/zshrc.local
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
+
+return 0
+
