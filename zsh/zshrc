@@ -127,8 +127,10 @@ alias yrs="yarn run serve"
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade"
+  alias i="sudo apt-get install"
 elif [ -f /etc/redhat-release ]; then
   alias up="sudo dnf update"
+  alias i="sudo dnf install"
 fi
 
 if hash ifconfig 2>/dev/null; then
