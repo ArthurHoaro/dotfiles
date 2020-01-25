@@ -52,6 +52,12 @@ print_success() {
   printf "\e[0;32m  [✔] $1\e[0m\n"
 }
 
+process_post_install() {
+  print_info "Processing post install:"
+  vim +PluginInstall +qall
+  print_result $? "Install Vim plugins"
+}
+
 # dotfiles directory
 dir=~/.dotfiles
 # old dotfiles backup directory
@@ -83,6 +89,7 @@ declare -A FILES_TO_SYMLINK=(
   ['.gitignore']='git/gitignore'
   ['.zshrc']='zsh/zshrc'
   ['.config/terminator/config']='terminator/config'
+  ['.vimrc']='vim/vimrc'
 
 )
 
@@ -100,7 +107,6 @@ for key in ${!FILES_TO_SYMLINK[@]}; do
 done
 
 for key in ${!FILES_TO_SYMLINK[@]}; do
-  echo "coucou"
   sourceFile="${dir}/${FILES_TO_SYMLINK[${key}]}"
   targetFile="$HOME/${key}"
 
@@ -118,3 +124,5 @@ for key in ${!FILES_TO_SYMLINK[@]}; do
     fi
   fi
 done
+
+process_post_install
