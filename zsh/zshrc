@@ -105,15 +105,15 @@ alias poule=pull
 # added by travis gem
 [ -f /home/arthur/.travis/travis.sh ] && source /home/arthur/.travis/travis.sh
 
-dockerin() {
+f_dockerin() {
     docker exec -i -t $1 bash
 }
-alias dockerin=dockerin
+alias dockerin=f_dockerin
 
-dockerinsh() {
+f_dockerinsh() {
     docker exec -i -t $1 sh
 }
-alias dockerinsh=dockerinsh
+alias dockerinsh=f_dockerinsh
 
 #alias yarn=nodejs-yarn
 alias cat=bat
@@ -127,8 +127,10 @@ alias yrs="yarn run serve"
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade"
+  alias i="sudo apt-get install"
 elif [ -f /etc/redhat-release ]; then
   alias up="sudo dnf update"
+  alias i="sudo dnf install"
 fi
 
 if hash ifconfig 2>/dev/null; then
@@ -139,4 +141,10 @@ fi
 eval $(thefuck --alias)
 
 source ~/.dotfiles/zsh/zshrc.local
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
+
+return 0
 

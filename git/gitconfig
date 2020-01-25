@@ -21,6 +21,7 @@
   default = current
 [pull]
   default = matching
+  rebase = preserve
 [branch]
   autoSetupMerge = always
 [rerere]
