@@ -21,10 +21,11 @@
   default = current
 [pull]
   default = matching
-  rebase = preserve
+  rebase = true
 [branch]
   autoSetupMerge = always
 [rerere]
   enabled = true
 [include]
   path = ~/.dotfiles/git/gitconfig.local
+
