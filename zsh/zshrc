@@ -136,4 +136,7 @@ else
   alias ifconfig="ip -c a"
 fi
 
+eval $(thefuck --alias)
+
 source ~/.dotfiles/zsh/zshrc.local
+

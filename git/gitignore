@@ -1,3 +1,5 @@
 .idea
 .directory
 .phpunit.result.cache
+.web-server-pid
+
