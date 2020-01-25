@@ -124,6 +124,7 @@ alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
 alias yrb="yarn run build"
 alias yrd="yarn run dev"
 alias yrs="yarn run serve"
+alias vimi="vim +PluginInstall +qall"
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade"
