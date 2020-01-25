@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMON_PACKAGES="git tig curl wget zsh terminator ncdu "
+COMMON_PACKAGES="git tig curl wget zsh terminator ncdu firefox"
 
 if [ ! -d ~/.ssh ]; then
   read -e -p "SSH Key Email : " EMAIL
@@ -34,6 +34,9 @@ if [ -f /etc/lsb-release ]; then
   # thefuck
   sudo apt install -y python3-dev python3-pip python3-setuptools
   sudo pip3 install thefuck
+
+  # tmux
+  sudo apt-get install tmux
 elif [ -f /etc/redhat-release ]; then
   sudo dnf install -y dnf-plugins-core
   sudo dnf copr enable -y evana/fira-code-fonts
@@ -46,6 +49,9 @@ elif [ -f /etc/redhat-release ]; then
   # thefuck - TODO
   sudo dnf install -y python3-devel
   sudo pip3 install thefuck
+
+  #tmux
+  sudo dnf install tmux
 fi
 
 # FZF shortcut thingy
@@ -61,4 +67,6 @@ sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/i
 # Vim Vundle
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
+# Tmux Plugin Manabger
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 

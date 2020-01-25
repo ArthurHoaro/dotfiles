@@ -23,6 +23,36 @@ execute() {
   print_result $? "${2:-$1}"
 }
 
+symlink() {
+  targetFile="$2"
+  sourceFile="$1"
+
+  if [[ -d "$targetFile" ]]; then
+    targetFile="${targetFile}$(basename ${sourceFile})"
+  fi
+
+  if [ ! -e "$targetFile" ]; then
+    execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
+  elif [ "$(readlink "$targetFile")" == "$sourceFile" ]; then
+    print_success "$targetFile → $sourceFile"
+  else
+    ask_for_confirmation "'$targetFile' already exists, do you want to overwrite it?"
+    if answer_is_yes; then
+      rm -rf "$targetFile"
+      execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
+    else
+      print_error "$targetFile → $sourceFile"
+    fi
+  fi
+
+}
+
+symlink_multiple_destination() {
+  for directory in $2; do
+    symlink $1 $directory
+  done
+}
+
 print_error() {
   # Print output in red
   printf "\e[0;31m  [✖] $1 $2\e[0m\n"
@@ -90,8 +120,18 @@ declare -A FILES_TO_SYMLINK=(
   ['.zshrc']='zsh/zshrc'
   ['.config/terminator/config']='terminator/config'
   ['.vimrc']='vim/vimrc'
+  ['.tmux.conf']='tmux/tmux.conf'
+  ['.mozilla/firefox/*default*/']='firefox/user.js'
+  ['.mozilla/firefox/*default*/chrome/']='firefox/userChrome.css'
 
 )
+
+# Manually initialize Firefox chrome folder
+for profile in ~/.mozilla/firefox/*default*/; do
+  if [[ ! -d "${profile}chrome" ]]; then
+    mkdir "${profile}chrome"
+  fi
+done
 
 # for key in ${!FILES_TO_SYMLINK[@]}; do
 #     echo ${key} ${FILES_TO_SYMLINK[${key}]}
@@ -110,19 +150,13 @@ for key in ${!FILES_TO_SYMLINK[@]}; do
   sourceFile="${dir}/${FILES_TO_SYMLINK[${key}]}"
   targetFile="$HOME/${key}"
 
-  if [ ! -e "$targetFile" ]; then
-    execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
-  elif [ "$(readlink "$targetFile")" == "$sourceFile" ]; then
-    print_success "$targetFile → $sourceFile"
+  if [[ "$targetFile" == *"*"* ]]; then
+    symlink_multiple_destination "$sourceFile" "$targetFile"
   else
-    ask_for_confirmation "'$targetFile' already exists, do you want to overwrite it?"
-    if answer_is_yes; then
-      rm -rf "$targetFile"
-      execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
-    else
-      print_error "$targetFile → $sourceFile"
-    fi
+    symlink "$sourceFile" "$targetFile"
   fi
+
+
 done
 
 process_post_install
