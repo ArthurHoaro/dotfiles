@@ -31,6 +31,10 @@ symlink() {
     targetFile="${targetFile}$(basename ${sourceFile})"
   fi
 
+  if [[ ! -d $(dirname "$targetFile") ]]; then
+    mkdir -p $(dirname "$targetFile")
+  fi
+
   if [ ! -e "$targetFile" ]; then
     execute "ln -fs $sourceFile $targetFile" "$targetFile → $sourceFile"
   elif [ "$(readlink "$targetFile")" == "$sourceFile" ]; then
@@ -123,6 +127,7 @@ declare -A FILES_TO_SYMLINK=(
   ['.tmux.conf']='tmux/tmux.conf'
   ['.mozilla/firefox/*default*/']='firefox/user.js'
   ['.mozilla/firefox/*default*/chrome/']='firefox/userChrome.css'
+  ['.config/fontconfig/conf.d/99-fira-code-light-color-emoji.conf']='font/99-fira-code-light-color-emoji.conf'
 
 )
 
