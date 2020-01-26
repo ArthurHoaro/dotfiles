@@ -297,3 +297,5 @@ tmux_conf_copy_to_os_clipboard=true
 #
 
 set-window-option -g xterm-keys on
+
+set-hook -g session-created 'split -h ; split -v htop ; select-pane -t 1'
