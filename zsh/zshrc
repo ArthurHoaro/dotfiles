@@ -50,7 +50,7 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git symfony2 cakephp3 composer dnf docker docker-compose dotenv yarn postgres)
+plugins=(git symfony2 cakephp3 composer dnf docker docker-compose yarn postgres)
 
 # User configuration
 
