@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMON_PACKAGES="git tig curl wget zsh terminator ncdu firefox"
+COMMON_PACKAGES="git vim tig curl wget zsh terminator ncdu firefox"
 
 if [ ! -d ~/.ssh ]; then
   read -e -p "SSH Key Email : " EMAIL
