@@ -5,10 +5,13 @@
 [difftool "kdiff3"]
   path = /usr/bin/kdiff3
   trustExitCode = false
+[difftool "meld"]
+  path = /usr/bin/meld
+  trustExitCode = false
 [difftool]
   prompt = false
 [diff]
-  tool = kdiff3
+  tool = meld
 [mergetool "kdiff3"]
   path = /usr/bin/kdiff3
   trustExitCode = false
