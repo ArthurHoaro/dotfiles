@@ -50,7 +50,7 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git symfony2 cakephp3 composer dnf docker docker-compose yarn postgres)
+plugins=(git symfony2 composer docker docker-compose yarn postgres zsh-autosuggestions zsh-syntax-highlighting)
 
 # User configuration
 
@@ -63,6 +63,7 @@ source $ZSH/oh-my-zsh.sh
 source ~/installs/key-bindings.zsh
 #source /usr/share/fzf/completion.zsh
 
+# Add a line break to Oh my ZSH prompt
 prompt_end() {
   if [[ -n $CURRENT_BG ]]; then
       print -n "%{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
@@ -131,6 +132,7 @@ alias dockerinsh=f_dockerinsh
 alias de="docker-compose exec -T"
 
 #alias yarn=nodejs-yarn
+alias de="docker-compose exec"
 alias cat=bat
 alias catp=bat -p
 alias ping="prettyping --nolegend"

@@ -3,3 +3,4 @@
 .phpunit.result.cache
 .web-server-pid
 .phpcs-cache
+.vscode

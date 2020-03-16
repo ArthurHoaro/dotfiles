@@ -61,8 +61,10 @@ wget -P ~/installs https://raw.githubusercontent.com/junegunn/fzf/master/shell/k
 wget -P ~/.local/bin/ https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
 chmod u+x ~/.local/bin/prettyping
 
-# Oh my ZSH
+# Oh my ZSH + plugins
 sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
 # Vim Vundle
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
