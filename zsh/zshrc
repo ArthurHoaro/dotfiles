@@ -50,13 +50,18 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git symfony2 composer docker docker-compose yarn postgres zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git symfony2 composer docker docker-compose yarn postgres zsh-autosuggestions zsh-syntax-highlighting history-sync)
 
 # User configuration
+
+export GOPATH="/home/arthur/go"
+export GO111MODULE=on
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/snap/bin"
 export PATH="${PATH}:/home/arthur/.local/bin:/home/arthur/bin:/home/arthur/scripts"
 export PATH="${PATH}:/home/arthur/.config/yarn/global/node_modules/.bin"
+export PATH="${PATH}:${GOPATH}/bin"
+export PATH="${PATH}:/home/arthur/.gem/ruby/2.7.0/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -142,6 +147,7 @@ alias yrb="yarn run build"
 alias yrd="yarn run dev"
 alias yrs="yarn run serve"
 alias vimi="vim +PluginInstall +qall"
+alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock assaflavie/runlike"
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade"
@@ -166,3 +172,5 @@ thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
 
 return 0
 
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /usr/local/bin/bit bit

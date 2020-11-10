@@ -65,6 +65,7 @@ chmod u+x ~/.local/bin/prettyping
 sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+git clone git@github.com:wulfgarpro/history-sync.git  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/history-sync
 
 # Vim Vundle
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
@@ -72,3 +73,6 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 # Tmux Plugin Manabger
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
+# bit
+curl -sf https://gobinaries.com/chriswalz/bit | sh
+bit complete

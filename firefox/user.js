@@ -33,3 +33,7 @@ user_pref("media.autoplay.default", 5);
 // Disable screenshot builtin addon
 user_pref("extensions.screenshots.disabled", true);
 
+// Firefox 76 - partially disable annoying megabar
+user_pref("browser.urlbar.update1", false);
+user_pref("browser.urlbar.update1.view.stripHttps", false);
+
