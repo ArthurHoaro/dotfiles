@@ -1,0 +1,3 @@
+#!/bin/bash
+
+WINEPREFIX="/home/arthur/.wine64" WINEARCH=win64 wine /mnt/DDIII/Programs/Guild\ Wars\ 2/Gw2-64.exe -dx9single
