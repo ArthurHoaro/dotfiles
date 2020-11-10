@@ -76,3 +76,9 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 # bit
 curl -sf https://gobinaries.com/chriswalz/bit | sh
 bit complete
+
+# dog - NOTE: libc6 version not compatible (v2.31 on ubuntu vs 2.32 required)
+DOG_LATEST=$(github_latest ogham/dog)
+curl -s -L https://github.com/ogham/dog/releases/download/${DOG_LATEST}/dog-${DOG_LATEST}-x86_64-unknown-linux-gnu.zip  | busybox unzip -j - bin/dog -d ~/.local/bin/ && chmod u+x ~/.local/bin/dog
+
+
