@@ -130,6 +130,7 @@ declare -A FILES_TO_SYMLINK=(
   ['.mozilla/firefox/*default*/']='firefox/user.js'
   ['.mozilla/firefox/*default*/chrome/']='firefox/userChrome.css'
   ['.config/fontconfig/conf.d/99-fira-code-light-color-emoji.conf']='font/99-fira-code-light-color-emoji.conf'
+  ['scripts']='scripts'
 
 )
 
