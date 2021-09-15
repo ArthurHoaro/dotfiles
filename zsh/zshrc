@@ -148,6 +148,7 @@ alias yrd="yarn run dev"
 alias yrs="yarn run serve"
 alias vimi="vim +PluginInstall +qall"
 alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock assaflavie/runlike"
+alias k="kubectl"
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade"
