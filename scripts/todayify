@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+
+if ($argc < 2 || $argc > 3) {
+  echo "Usage: todayify path [new slug]" . PHP_EOL;
+  exit(1);
+}
+
+$filePath = $argv[1];
+
+if ($argc === 3) {
+  $newSlug = $argv[2];
+}
+
+if (!preg_match('#^(.*/?)(\d{4}-\d{2}-\d{2})-(.*)\.(en|fr)\.md$#', $filePath, $matches)) {
+  echo 'File does not match expected pattern' . PHP_EOL;
+  exit(3);
+}
+
+if (!file_exists($filePath)) {
+  echo 'File not found: ' . $filePath . PHP_EOL;
+  exit(2);
+}
+
+$date = (new DateTime())->format('Y-m-d');
+foreach (['en', 'fr'] as $lang) {
+  $from = $matches[1] . $matches[2] . '-' . $matches[3] . '.' . $lang . '.md';
+  $to = $matches[1] . $date . '-' . ($newSlug ?? $matches[3]) . '.' . $lang . '.md';
+
+  if (!file_exists($from)) {
+    echo "File to rename $from not found." . PHP_EOL;
+    echo "Copying $filePath instead..." . PHP_EOL;
+    echo "-->" . PHP_EOL;
+    echo $to . PHP_EOL . PHP_EOL;
+
+    copy($filePath, $to);
+  } else {
+    echo 'Renaming ' . PHP_EOL . $from . PHP_EOL . ' --> ' . PHP_EOL . $to . PHP_EOL . PHP_EOL;
+  
+    rename($from, $to);
+    $filePath = $from === $filePath ? $to : $filePath;
+  }
+}
