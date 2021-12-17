@@ -67,6 +67,11 @@ export PATH="${PATH}:/home/arthur/.gem/ruby/2.7.0/bin"
 export PATH="${PATH}:/${GUIX_PROFILE}/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
+# Rust
+source $HOME/.cargo/env
+
+export XDG_CONFIG_HOME=/home/arthur/.config/
+
 source $ZSH/oh-my-zsh.sh
 source ~/installs/key-bindings.zsh
 #source /usr/share/fzf/completion.zsh

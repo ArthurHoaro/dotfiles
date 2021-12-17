@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ -z "${PHP_VERSION_XD_TOGGLE}" ]]; then
+  PHP_VERSION_XD_TOGGLE="8.0"
+fi
+
+if [[ -f "/etc/php/${PHP_VERSION_XD_TOGGLE}/cli/conf.d/20-xdebug.ini" ]]; then
+  sudo mv "/etc/php/${PHP_VERSION_XD_TOGGLE}/cli/conf.d/20-xdebug.ini" "/etc/php/${PHP_VERSION_XD_TOGGLE}/cli/conf.d/20-xdebug.ini.dis"
+else
+  sudo mv "/etc/php/${PHP_VERSION_XD_TOGGLE}/cli/conf.d/20-xdebug.ini.dis" "/etc/php/${PHP_VERSION_XD_TOGGLE}/cli/conf.d/20-xdebug.ini"
+fi
+
+php -v
