@@ -1,6 +1,8 @@
 # Path to your oh-my-zsh installation.
 export ZSH=/home/arthur/.oh-my-zsh
 
+autoload zmv
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
@@ -56,15 +58,17 @@ plugins=(git symfony2 composer docker docker-compose yarn postgres zsh-autosugge
 
 export GOPATH="/home/arthur/go"
 export GO111MODULE=on
-#export GUIX_PROFILE="/home/arthur/.config/guix/current"
 export GUIX_PROFILE="/home/arthur/.guix-profile"
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/snap/bin"
-export PATH="${PATH}:/home/arthur/.local/bin:/home/arthur/bin:/home/arthur/scripts"
-export PATH="${PATH}:/home/arthur/.config/yarn/global/node_modules/.bin"
-export PATH="${PATH}:${GOPATH}/bin"
-export PATH="${PATH}:/home/arthur/.gem/ruby/2.7.0/bin"
+export PATH="${PATH}:/home/arthur/.local/bin:/home/arthur/bin"
+export PATH=$PATH:$(find $HOME/scripts/ -maxdepth 1 -type d | paste -sd ":" -)
+export PATH="${PATH}:/home/arthur/.config/yarn/global/node_modules/.bin:/home/arthur/.yarn/bin"
+export PATH="${PATH}:${GOPATH}/bin:/usr/local/go/bin"
+export PATH="${PATH}:/home/arthur/.gem/ruby/2.7.0/bin:/home/arthur/.gem/ruby/3.0.0/bin"
+export PATH="${PATH}:/home/arthur/.npm-global/bin:/home/arthur/.n/bin"
 export PATH="${PATH}:/${GUIX_PROFILE}/bin"
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # Rust
@@ -74,6 +78,7 @@ export XDG_CONFIG_HOME=/home/arthur/.config/
 
 source $ZSH/oh-my-zsh.sh
 source ~/installs/key-bindings.zsh
+source "$GUIX_PROFILE/etc/profile"
 #source /usr/share/fzf/completion.zsh
 
 # Add a line break to Oh my ZSH prompt
@@ -125,6 +130,12 @@ export EDITOR="$VISUAL"
 export DEFAULT_USER=arthur
 export OPENSSL_CONF=/dev/null
 
+export N_PREFIX=~/.n
+export CHROME_BIN=/usr/bin/chromium-browser
+
+# PhantomJS issue...
+export OPENSSL_CONF=/etc/ssl
+
 #export WORKON_HOME=~/pyenvs
 #source /usr/bin/virtualenvwrapper.sh
 alias gst='git status'
@@ -160,7 +171,7 @@ alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock assa
 alias k="kubectl"
 
 if [ -f /etc/lsb-release ]; then
-  alias up="sudo apt-get update && sudo apt-get upgrade"
+  alias up="sudo apt-get update && sudo apt-get upgrade && sudo snap refresh"
   alias i="sudo apt-get install"
 elif [ -f /etc/redhat-release ]; then
   alias up="sudo dnf update"
@@ -174,8 +185,6 @@ fi
 
 eval $(thefuck --alias)
 
-source ~/.dotfiles/zsh/zshrc.local
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
@@ -184,4 +193,5 @@ return 0
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /usr/local/bin/bit bit
-. ~/.dotfiles/zsh/zshrc.local
+
+source ~/.dotfiles/zsh/zshrc.local

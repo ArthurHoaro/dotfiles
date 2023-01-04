@@ -91,7 +91,7 @@ process_post_install() {
   vim +PluginInstall +qall
   print_result $? "Install Vim plugins"
 
-  echo "emulate sh -c 'source /etc/profile.d/apps-bin-path.sh'" >> /etc/zsh/zprofile
+  sudo bash -c "echo emulate sh -c 'source /etc/profile.d/apps-bin-path.sh' >> /etc/zsh/zprofile"
 }
 
 # dotfiles directory

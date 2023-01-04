@@ -1,11 +1,1 @@
-/* Useful for TreeStyleTab plugin */
-
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-
-#TabsToolbar {
-  visibility:collapse;
-}
-#sidebar-header {
-  display:none;
-}
-
+#TabsToolbar{ background-color: #FF0000 !important }
