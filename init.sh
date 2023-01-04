@@ -36,7 +36,7 @@ if [ -f /etc/lsb-release ]; then
   sudo pip3 install thefuck
 
   # tmux
-  sudo apt-get install tmux
+  sudo apt-get install -y tmux
 elif [ -f /etc/redhat-release ]; then
   sudo dnf install -y dnf-plugins-core
   sudo dnf copr enable -y evana/fira-code-fonts
