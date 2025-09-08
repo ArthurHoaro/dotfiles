@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+
+"""
+This script is designed to help users find their Firefox profiles and create
+a backup of the `containers.json` file, especially if they use the 'Temporary Containers' extension.
+Once the user selects the desired profile using arrow keys, the script does the following:
+
+1. Identifies and removes any 'Temporary Containers' entries (those starting with 'tmp') from the `containers.json` file.
+2. Creates a backup of the original `containers.json` file. If a backup already exists, it appends a timestamp to the new backup to avoid overwrites.
+3. Overwrites the `containers.json` file with the cleaned data.
+
+Supported Operating Systems:
+- macOS
+- Windows
+- Linux and other UNIX systems
+
+Usage:
+Run the script and follow on-screen prompts to select the desired Firefox profile.
+
+Note:
+After running the script, restart Firefox to see the changes.
+"""
+
+import json
+import os
+import shutil
+import curses
+import platform
+from datetime import datetime
+
+
+def list_firefox_profiles():
+    profiles = []
+
+    if platform.system() == "Darwin":  # macOS
+        profile_ini_path = os.path.expanduser(
+            "~/Library/Application Support/Firefox/profiles.ini"
+        )
+    elif platform.system() == "Windows":
+        profile_ini_path = os.path.join(
+            os.environ["APPDATA"], "Mozilla\\Firefox\\profiles.ini"
+        )
+    else:  # Linux and other UNIX systems
+        profile_ini_path = os.path.expanduser("~/.mozilla/firefox/profiles.ini")
+
+    if not os.path.exists(profile_ini_path):
+        return []
+
+    with open(profile_ini_path, "r") as f:
+        in_profile = False
+        for line in f:
+            if line.startswith("[Profile"):
+                in_profile = True
+                current_profile = {}
+            elif line.strip() == "":
+                in_profile = False
+                profiles.append(current_profile)
+            elif in_profile:
+                key, value = line.strip().split("=", 1)
+                current_profile[key] = value
+
+    base_path = os.path.dirname(profile_ini_path)
+    return [os.path.join(base_path, p["Path"]) for p in profiles if "Path" in p]
+
+
+def select_profile(screen):
+    profiles = list_firefox_profiles()
+    # Remove duplicates
+    profiles = list(set(profiles))
+    idx = 0
+
+    while True:
+        screen.clear()
+        screen.addstr(
+            "Select a Firefox profile containing the 'Temporary Containers' `containers.json` file to fix:\n"
+        )
+
+        for i, profile in enumerate(profiles):
+            if i == idx:
+                screen.addstr(f"> {profile}\n")
+            else:
+                screen.addstr(f"  {profile}\n")
+        key = screen.getch()
+
+        if key == curses.KEY_DOWN:
+            idx = (idx + 1) % len(profiles)
+        elif key == curses.KEY_UP:
+            idx = (idx - 1) % len(profiles)
+        elif key == ord("\n"):
+            return profiles[idx]
+
+    curses.endwin()
+
+
+def name_starts_with_tmp(identity):
+    try:
+        return not identity["name"].startswith("tmp")
+    except (TypeError, KeyError):
+        return False
+
+
+def backup_file_with_timestamp(profile_path):
+    containers_path = os.path.join(profile_path, "containers.json")
+    backup_path = os.path.join(profile_path, "containers.json.bak")
+
+    # Append timestamp if backup already exists
+    if os.path.exists(backup_path):
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        backup_path = os.path.join(profile_path, f"containers.json.bak.{timestamp}")
+
+    shutil.copy(containers_path, backup_path)
+
+    return backup_path
+
+
+def main():
+    profile_path = curses.wrapper(select_profile)
+    containers_path = os.path.join(profile_path, "containers.json")
+
+    if not os.path.exists(containers_path):
+        print(f"'containers.json' not found in the selected profile.")
+        return
+
+    backup_path = backup_file_with_timestamp(profile_path)
+
+    with open(containers_path, "r") as f:
+        s = f.read()
+        j = json.loads(s)
+        ids = filter(name_starts_with_tmp, j["identities"])
+        ids = list(ids)
+        print(len(j["identities"]), len(ids))
+        j["identities"] = ids
+
+        with open(containers_path, "w") as wf:
+            wf.write(json.dumps(j))
+
+    print(f"Original backed up to {backup_path}")
+    print("Please restart Firefox to see the changes.")
+
+
+if __name__ == "__main__":
+    main()
+
