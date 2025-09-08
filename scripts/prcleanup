@@ -1,0 +1,152 @@
+#!/bin/zsh
+
+# set -x
+# set -e
+
+###
+# This script will check all linters and make sure that your branch is ready for review/merge.
+# Call it with an optional parent branch (default: develop): `prcleanup staging`
+#
+# In details, it will:
+# 1. Stash uncommited changes
+# 2. Generate GraphQL code
+# 3. Go to parent branch and run ESLint there
+# 4. Merge parent branch into your branch
+# 5. Run ESLint in your branch
+# 6. Compare ESLint number of warnings
+# 7. Run TypeScript CLI tool
+# 8. Run stylint
+# 9. Push your branch to remote
+###
+
+SCRIPT_NAME=$(basename $0)
+STASH_NAME=${SCRIPT_NAME}-$(date -u +%Y-%m-%dT%H:%M:%SZ)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+DIFF_TOOL=$(git config --get diff.tool)
+COMMAND="meteor npx eslint --cache \"{imports,server,common,test,tests,.stories}/**/*.{js,jsx,ts,tsx}\"" # --ext .js,.jsx,.ts,.tsx imports server common test tests .stories"
+
+function cleanup {
+  git checkout $BRANCH
+
+  stash_reference=$(git stash list --grep ${STASH_NAME} | cut -d ':' -f 1 | head -n 1)
+
+  if [[ ! -z ${stash_reference} ]]; then
+    git stash pop "$stash_reference"
+  fi
+
+  exit $1
+}
+
+if [[ -z ${DIFF_TOOL} ]]; then
+  echo "You have no git diff tool configured to display the differences, like meld. E.g. https://stackoverflow.com/a/34119867"
+  cleanup 1
+fi
+
+if [[ $BRANCH == 'develop' ]]; then
+  echo "You are already on develop."
+  cleanup 2
+fi
+
+git fetch --all
+
+if [[ $# -eq 1 ]]; then
+  PARENT_BRANCH=$1
+else
+  PARENT_BRANCH=develop
+fi
+
+echo "\nUsing branch: ${PARENT_BRANCH} --- IT WILL BE MERGED"
+sleep 2
+
+# Stash only unstaged changes (debug stuff and so on)
+git stash --keep-index -u -m ${STASH_NAME}
+
+git diff-index --quiet HEAD --
+if [[ $? -ne 0 ]]; then
+  echo "There are changes staged for commit. Commit or clear them."
+  cleanup 3
+fi
+
+meteor npm run gql-codegen
+
+if [[ $? -ne 0 ]]; then
+  echo "There was an issue when trying to re-generate GraphQL code.\n"
+
+  read "?Hit return to skip GraphQL check " input
+
+  if [[ -z "$input" ]]; then
+    echo "Ignoring GraphQL error"
+  else
+    cleanup 8
+  fi
+fi
+
+git diff-index --quiet HEAD --
+if [[ $? -ne 0 ]]; then
+  echo "There are GraphQL generated code changes that needs to be commited."
+  cleanup 9
+fi
+
+git checkout ${PARENT_BRANCH}
+git pull origin  ${PARENT_BRANCH}
+
+echo -n "Running ESLint on ${PARENT_BRANCH}, it could take a little while..."
+eval ${COMMAND} > ~/tmp/${SCRIPT_NAME}1
+echo " Done!"
+
+git checkout $BRANCH
+git merge ${PARENT_BRANCH} --no-edit
+
+# Check if there were any conflicts during the merge
+if git diff --name-only --diff-filter=U | grep -q .; then
+  echo "Merge conflict(s) detected. Please resolve them then re-run the script."
+  cleanup 4
+fi
+
+echo -n "Running ESLint on ${BRANCH},  it could take a little while..."
+eval ${COMMAND} > ~/tmp/${SCRIPT_NAME}2
+
+# Check if eslint has reported any errors using its return code
+if [[ $? -ne 0 ]]; then
+  cat ~/tmp/${SCRIPT_NAME}2 | grep -B 5 -A 3 "  error"
+
+  echo "There are eslint errors. Please resolve them then re-run the script."
+  cleanup 5
+fi
+echo " Done!"
+
+echo "Comparing ESLint number of warnings..."
+source <(grep -v 'COMMAND' .scripts/eslint.sh)
+
+SUMMARY_REPORT=$(grep -E "✖ [0-9]+ problems \(0 errors, [0-9]+ warnings)" ~/tmp/${SCRIPT_NAME}2)
+WARN_COUNT=$(echo "$SUMMARY_REPORT" | grep -oE "[0-9]+ warnings)" | grep -oE "[0-9]+")
+
+if [ "$EXPECTED_WARN_COUNT" != "$WARN_COUNT" ]; then
+    echo "There are eslint warnings count mismatch [${EXPECTED_WARN_COUNT} {${PARENT_BRANCH}} vs ${WARN_COUNT} {${BRANCH}}]. Check the diff."
+
+    ${DIFF_TOOL} ~/tmp/${SCRIPT_NAME}1 ~/tmp/${SCRIPT_NAME}2 &
+
+    cleanup 6
+fi
+
+echo -n "Running TypeScript validation, hold on..."
+meteor npm run typescript
+if [[ $? -ne 0 ]]; then
+  echo "There are typescript errors. Please resolve them then re-run the script."
+  cleanup 7
+fi
+echo " Done!"
+
+echo -n "Running SASS validation, hold on..."
+meteor npm run stylelint
+if [[ $? -ne 0 ]]; then
+  echo "There are style errors. Please resolve them then re-run the script."
+  cleanup 10
+fi
+echo " Done!"
+
+echo "Everything looks good! Pushing to remote."
+git push origin $BRANCH
+
+cleanup 0
+

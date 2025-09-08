@@ -1,0 +1,17 @@
+#!/bin/bash
+
+git status
+git add .
+git status
+
+CONFIRM='defineme'
+while [[ $CONFIRM != "y" && $CONFIRM != "n" && $CONFIRM != '' ]]; do
+  read -p "Confirm? [y/n] " CONFIRM
+done
+
+if [[ $CONFIRM == 'n' ]]; then
+  exit 0;
+fi
+
+git commit -m "~/gall $(date)"
+git push origin $(git rev-parse --abbrev-ref HEAD)

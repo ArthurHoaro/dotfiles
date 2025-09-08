@@ -59,15 +59,21 @@ plugins=(git symfony2 composer docker docker-compose yarn postgres zsh-autosugge
 export GOPATH="/home/arthur/go"
 export GO111MODULE=on
 export GUIX_PROFILE="/home/arthur/.guix-profile"
+export NODE_OPTIONS="--max-old-space-size=16384"
+export TOOL_NODE_FLAGS="--max-old-space-size=16384"
+export ANDROID_HOME=$HOME/Android/Sdk
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/snap/bin"
+export PATH="/home/arthur/.n/bin:/home/arthur/.npm-global/bin"
+export PATH="${PATH}:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/snap/bin"
 export PATH="${PATH}:/home/arthur/.local/bin:/home/arthur/bin"
 export PATH=$PATH:$(find $HOME/scripts/ -maxdepth 1 -type d | paste -sd ":" -)
 export PATH="${PATH}:/home/arthur/.config/yarn/global/node_modules/.bin:/home/arthur/.yarn/bin"
 export PATH="${PATH}:${GOPATH}/bin:/usr/local/go/bin"
 export PATH="${PATH}:/home/arthur/.gem/ruby/2.7.0/bin:/home/arthur/.gem/ruby/3.0.0/bin"
-export PATH="${PATH}:/home/arthur/.npm-global/bin:/home/arthur/.n/bin"
 export PATH="${PATH}:/${GUIX_PROFILE}/bin"
+export PATH="$PATH:/opt/nvim-linux64/bin"
+export PATH="$PATH:/home/arthur/installs/ltex-ls-16.0.0/bin"
+export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -75,6 +81,7 @@ export PATH="${PATH}:/${GUIX_PROFILE}/bin"
 source $HOME/.cargo/env
 
 export XDG_CONFIG_HOME=/home/arthur/.config/
+export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/arthur/.local/share/flatpak/exports/share:/var/lib/snapd/desktop/applications"
 
 source $ZSH/oh-my-zsh.sh
 source ~/installs/key-bindings.zsh
@@ -105,8 +112,10 @@ prompt_end() {
 # else
 #   export EDITOR='mvim'
 # fi
-export VISUAL=vim
+export VISUAL=nvim
 export EDITOR="$VISUAL"
+alias vim="$VISUAL"
+alias v="$VISUAL"
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -141,6 +150,9 @@ export OPENSSL_CONF=/etc/ssl
 alias gst='git status'
 alias git='git '
 alias poule=pull
+alias gpm='git add . && git commit -m "auto-push $(date)" && git push origin master'
+alias gtop='gpustat -cp --watch'
+alias weather="while true; do clear; date && curl -s 'wttr.in/~Lynchburg+VA?2'; sleep 1800; done"
 
 # added by travis gem
 [ -f /home/arthur/.travis/travis.sh ] && source /home/arthur/.travis/travis.sh
@@ -169,6 +181,8 @@ alias yrs="yarn run serve"
 alias vimi="vim +PluginInstall +qall"
 alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock assaflavie/runlike"
 alias k="kubectl"
+alias wr="~/bin/wordreference.py"
+
 
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade && sudo snap refresh"
@@ -183,15 +197,104 @@ else
   alias ifconfig="ip -c a"
 fi
 
-eval $(thefuck --alias)
+#eval $(thefuck --alias)
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
-
-return 0
+#thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /usr/local/bin/bit bit
 
+export PHPENV_ROOT="/home/arthur/.phpenv"
+if [ -d "${PHPENV_ROOT}" ]; then
+  export PATH="${PHPENV_ROOT}/bin:${PATH}"
+  eval "$(phpenv init -)"
+fi
+
+
 source ~/.dotfiles/zsh/zshrc.local
+export PATH=/home/arthur/.meteor:$PATH
+
+cursor() {
+    local appimage_path=$(ls /home/arthur/installs/Applications/cursor-*.AppImage | sort -V | tail -n 1)
+    if [[ $# -eq 0 ]]; then
+        set -- "."
+    fi
+
+    if [[ -f $appimage_path ]]; then
+        "$appimage_path" --no-sandbox "$@" > /dev/null 2>&1 &
+    else
+        echo "Cursor AppImage not found on the Desktop."
+    fi
+}
+alias c="cursor ."
+
+alias getgov="cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+alias getgov_available="cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"
+function setgov ()
+{
+     # performance or powersave
+     for i in {0..5};
+     do
+         sudo  cpufreq-set -c $i -g $1; # run cpufreq-set with root
+     done
+}
+
+function hbenben()
+{
+  temp_file=$(mktemp)
+  curl -sL "$1" -o "$temp_file"
+  echo "Downloaded file -> Playing"
+  benben "$temp_file"
+  rm "$temp_file"
+}
+
+export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
+export FPATH=$HOME/tools/ripgrep/complete:$FPATH
+
+# Workaround for kitty only (https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH)
+[ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
+
+
+. "$HOME/.atuin/bin/env"
+
+eval "$(atuin init zsh)"
+
+# pnpm
+export PNPM_HOME="/home/arthur/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+export NVM_DIR="$HOME/.config//nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# place this after nvm initialization!
+autoload -U add-zsh-hook
+
+load-nvmrc() {
+  local nvmrc_path
+  nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version
+    nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$(nvm version)" ]; then
+      nvm use
+    fi
+  elif [ -n "$(PWD=$OLDPWD nvm_find_nvmrc)" ] && [ "$(nvm version)" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+

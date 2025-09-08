@@ -4,5 +4,7 @@
 .web-server-pid
 .phpcs-cache
 .vscode
+.cursor
 *.swp
 *.orig
+.obsidian/workspace.json
