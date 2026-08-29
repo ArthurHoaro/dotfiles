@@ -298,3 +298,4 @@ load-nvmrc() {
 add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 
+[ -f ~/projects/ai/gwt/gwt.plugin.zsh ] && source ~/projects/ai/gwt/gwt.plugin.zsh
