@@ -32,3 +32,5 @@
 [include]
   path = ~/.dotfiles/git/gitconfig.local
 
+[alias]
+	nuke = !git fetch && git reset --hard @{u}

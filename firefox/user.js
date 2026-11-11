@@ -15,7 +15,6 @@ user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 
 user_pref("accessibility.blockautorefresh", true);
 user_pref("extensions.pocket.enabled", false);
-user_pref("dom.event.clipboardevents.enabled", false);
 
 // Disable full screen exit warning
 user_pref("full-screen-api.warning.timeout", false);

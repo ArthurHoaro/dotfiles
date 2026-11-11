@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMON_PACKAGES="git vim tig curl wget zsh terminator ncdu firefox"
+COMMON_PACKAGES="git vim tig curl wget zsh ncdu firefox"
 
 if [ ! -d ~/.ssh ]; then
   read -e -p "SSH Key Email : " EMAIL
@@ -52,6 +52,11 @@ elif [ -f /etc/redhat-release ]; then
 
   #tmux
   sudo dnf install tmux
+elif [ -f /etc/os-release ]; then
+  sudo zypper install -y ${COMMON_PACKAGES}
+
+  # bat
+  sudo zypper install -y bat
 fi
 
 # FZF shortcut thingy
@@ -71,14 +76,14 @@ git clone git@github.com:wulfgarpro/history-sync.git  ${ZSH_CUSTOM:-~/.oh-my-zsh
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 # Tmux Plugin Manabger
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 # bit
-curl -sf https://gobinaries.com/chriswalz/bit | sh
-bit complete
+# curl -sf https://gobinaries.com/chriswalz/bit | sh
+# bit complete
 
 # dog - NOTE: libc6 version not compatible (v2.31 on ubuntu vs 2.32 required)
-DOG_LATEST=$(github_latest ogham/dog)
-curl -s -L https://github.com/ogham/dog/releases/download/${DOG_LATEST}/dog-${DOG_LATEST}-x86_64-unknown-linux-gnu.zip  | busybox unzip -j - bin/dog -d ~/.local/bin/ && chmod u+x ~/.local/bin/dog
+# DOG_LATEST=$(github_latest ogham/dog)
+# curl -s -L https://github.com/ogham/dog/releases/download/${DOG_LATEST}/dog-${DOG_LATEST}-x86_64-unknown-linux-gnu.zip  | busybox unzip -j - bin/dog -d ~/.local/bin/ && chmod u+x ~/.local/bin/dog
 
 

@@ -1,4 +1,5 @@
 .idea
+.claude
 .directory
 .phpunit.result.cache
 .web-server-pid
@@ -8,3 +9,4 @@
 *.swp
 *.orig
 .obsidian/workspace.json
+CLAUDE.local.md

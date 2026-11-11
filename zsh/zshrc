@@ -61,7 +61,14 @@ export GO111MODULE=on
 export GUIX_PROFILE="/home/arthur/.guix-profile"
 export NODE_OPTIONS="--max-old-space-size=16384"
 export TOOL_NODE_FLAGS="--max-old-space-size=16384"
-export ANDROID_HOME=$HOME/Android/Sdk
+export ANDROID_HOME=$HOME/installs/Android
+# openSUSE: /usr/bin/javac is a libalternatives dispatcher (/usr/bin/alts), so readlink
+# can't find the JDK. Ask `alts` for the selected javac; fall back to readlink elsewhere.
+_javac="$(alts -l javac 2>/dev/null | awk '$2 ~ /\*$/ {print $4}')"
+[[ -x $_javac ]] || _javac="$(readlink -f "$(command -v javac)")"
+export JDK_HOME="${_javac:h:h}"
+export JAVA_HOME="$JDK_HOME"
+unset _javac
 
 export PATH="/home/arthur/.n/bin:/home/arthur/.npm-global/bin"
 export PATH="${PATH}:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/snap/bin"
@@ -74,6 +81,9 @@ export PATH="${PATH}:/${GUIX_PROFILE}/bin"
 export PATH="$PATH:/opt/nvim-linux64/bin"
 export PATH="$PATH:/home/arthur/installs/ltex-ls-16.0.0/bin"
 export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+export PATH="$PATH:$JAVA_HOME/bin"
+
+export GTI_SPEED=2500
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -84,14 +94,15 @@ export XDG_CONFIG_HOME=/home/arthur/.config/
 export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/arthur/.local/share/flatpak/exports/share:/var/lib/snapd/desktop/applications"
 
 source $ZSH/oh-my-zsh.sh
+
 source ~/installs/key-bindings.zsh
-source "$GUIX_PROFILE/etc/profile"
+#source "$GUIX_PROFILE/etc/profile"
 #source /usr/share/fzf/completion.zsh
 
 # Add a line break to Oh my ZSH prompt
 prompt_end() {
   if [[ -n $CURRENT_BG ]]; then
-      print -n "%{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
+      print -n " %{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
   else
       print -n "%{%k%}"
   fi
@@ -101,6 +112,66 @@ prompt_end() {
 
   #Adds the new line and ➜ as the start character.
   printf "\n ➜";
+}
+
+# Agnoster's prompt_git runs ~8 git commands per prompt (~100ms); this gets the same info from one.
+prompt_git() {
+  (( $+commands[git] )) || return
+  local line head oid ab dirty staged unstaged ref mode git_dir dir=$PWD
+  local PL_BRANCH_CHAR=''
+  local -a st
+  st=("${(@f)$(command git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null)}")
+  [[ -n $st[1] ]] || return
+  for line in $st; do
+    case $line in
+      '# branch.head '*) head=${line#\# branch.head } ;;
+      '# branch.oid '*) oid=${line#\# branch.oid } ;;
+      '# branch.ab '*) ab=${line#\# branch.ab } ;;
+      [12u]' '*)
+        dirty=1
+        [[ ${line[3]} != . ]] && staged='✚'
+        [[ ${line[4]} != . ]] && unstaged='±'
+        ;;
+      '? '*) dirty=1 ;;
+    esac
+  done
+
+  if [[ $head != '(detached)' ]]; then
+    ref="$PL_BRANCH_CHAR $head"
+  elif ref=$(command git describe --exact-match --tags HEAD 2>/dev/null); then
+    ref="◈ $ref"
+  else
+    ref="➦ ${oid[1,7]}"
+  fi
+
+  if [[ $AGNOSTER_GIT_BRANCH_STATUS == 'true' && -n $ab ]]; then
+    local ahead=${${ab%% *}#+} behind=${${ab##* }#-}
+    if (( ahead && behind )); then ref='⇅'" $head"
+    elif (( ahead )); then ref='↱'" $head"
+    elif (( behind )); then ref='↰'" $head"
+    fi
+  fi
+
+  while [[ $dir != / && ! -e $dir/.git ]]; do dir=${dir:h}; done
+  if [[ -f $dir/.git ]]; then
+    git_dir=${$(<$dir/.git)#gitdir: }
+    [[ $git_dir == /* ]] || git_dir=$dir/$git_dir
+  else
+    git_dir=$dir/.git
+  fi
+  if [[ -e $git_dir/BISECT_LOG ]]; then mode=" <B>"
+  elif [[ -e $git_dir/MERGE_HEAD ]]; then mode=" >M<"
+  elif [[ -e $git_dir/rebase || -e $git_dir/rebase-apply || -e $git_dir/rebase-merge ]]; then mode=" >R>"
+  fi
+
+  if [[ -n $dirty ]]; then
+    prompt_segment "$AGNOSTER_GIT_DIRTY_BG" "$AGNOSTER_GIT_DIRTY_FG"
+  else
+    prompt_segment "$AGNOSTER_GIT_CLEAN_BG" "$AGNOSTER_GIT_CLEAN_FG"
+  fi
+  local flags="${unstaged}${staged}"
+  echo -n "${ref//\%/%%}${flags:+ $flags}${mode}"
+  [[ $AGNOSTER_GIT_INLINE == 'true' ]] && prompt_git_relative
 }
 
 # You may need to manually set your language environment
@@ -183,13 +254,15 @@ alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock assa
 alias k="kubectl"
 alias wr="~/bin/wordreference.py"
 
-
 if [ -f /etc/lsb-release ]; then
   alias up="sudo apt-get update && sudo apt-get upgrade && sudo snap refresh"
   alias i="sudo apt-get install"
 elif [ -f /etc/redhat-release ]; then
   alias up="sudo dnf update"
   alias i="sudo dnf install"
+elif [ -f /etc/os-release ]; then
+  alias up="sudo zypper ref && sudo zypper dup"
+  alias i="sudo zypper in"
 fi
 
 if hash ifconfig 2>/dev/null; then
@@ -203,7 +276,7 @@ fi
 
 #thefuck -v >/dev/null 2>&1 && eval $(thefuck --alias)
 
-autoload -U +X bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
 complete -o nospace -C /usr/local/bin/bit bit
 
 export PHPENV_ROOT="/home/arthur/.phpenv"
@@ -212,12 +285,11 @@ if [ -d "${PHPENV_ROOT}" ]; then
   eval "$(phpenv init -)"
 fi
 
-
 source ~/.dotfiles/zsh/zshrc.local
 export PATH=/home/arthur/.meteor:$PATH
 
-cursor() {
-    local appimage_path=$(ls /home/arthur/installs/Applications/cursor-*.AppImage | sort -V | tail -n 1)
+legacy_cursor() {
+    local appimage_path=$(ls /home/arthur/installs/Applications/cursor-*.appimage | sort -V | tail -n 1)
     if [[ $# -eq 0 ]]; then
         set -- "."
     fi
@@ -229,6 +301,9 @@ cursor() {
     fi
 }
 alias c="cursor ."
+kc() {
+  kill -9 $(ps aux | grep 'cursor' | awk '{print $2}')
+}
 
 alias getgov="cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
 alias getgov_available="cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"
@@ -256,7 +331,6 @@ export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 # Workaround for kitty only (https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH)
 [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
 
-
 . "$HOME/.atuin/bin/env"
 
 eval "$(atuin init zsh)"
@@ -269,33 +343,77 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-export NVM_DIR="$HOME/.config//nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NVM_DIR="$HOME/.config/nvm"
 
-# place this after nvm initialization!
+# Sourcing nvm.sh costs ~1.5s per shell, so it only loads on the first `nvm` call.
+nvm() {
+  unfunction nvm
+  source "$NVM_DIR/nvm.sh" --no-use
+  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+  nvm "$@"
+}
+
+_nvm_find_up() {
+  local dir=${1:-$PWD}
+  while true; do
+    [[ -f $dir/.nvmrc ]] && { REPLY=$dir/.nvmrc; return 0 }
+    [[ $dir == / ]] && return 1
+    dir=${dir:h}
+  done
+}
+
+# Picks the newest installed version for numeric specs like v24, 22.15 or default.
+_nvm_resolve() {
+  local spec=$1
+  [[ $spec == default && -f $NVM_DIR/alias/default ]] && spec=$(<$NVM_DIR/alias/default)
+  spec=${spec#v}
+  [[ $spec =~ '^[0-9]+(\.[0-9]+)*$' ]] || return 1
+  local -a found=($NVM_DIR/versions/node/v${spec}(|.*)(N/n))
+  (( $#found )) || return 1
+  REPLY=${found[-1]:t}
+}
+
+_nvm_activate() {
+  local dir=$NVM_DIR/versions/node/$1
+  path=($dir/bin ${path:#*/nvm/versions/node/*/bin})
+  export NVM_BIN=$dir/bin NVM_INC=$dir/include/node
+}
+
 autoload -U add-zsh-hook
 
 load-nvmrc() {
-  local nvmrc_path
-  nvmrc_path="$(nvm_find_nvmrc)"
+  local spec rc
+  if _nvm_find_up; then
+    rc=$REPLY
+    spec=${"$(<$rc)"//[[:space:]]/}
+  elif [[ $1 == init ]] || _nvm_find_up $OLDPWD; then
+    spec=default
+  else
+    return
+  fi
 
-  if [ -n "$nvmrc_path" ]; then
-    local nvmrc_node_version
-    nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-    if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install
-    elif [ "$nvmrc_node_version" != "$(nvm version)" ]; then
-      nvm use
-    fi
-  elif [ -n "$(PWD=$OLDPWD nvm_find_nvmrc)" ] && [ "$(nvm version)" != "$(nvm version default)" ]; then
-    echo "Reverting to nvm default version"
+  if _nvm_resolve $spec; then
+    [[ -n ${path[(r)$NVM_DIR/versions/node/$REPLY/bin]} ]] && return
+    _nvm_activate $REPLY
+    [[ $1 == init && -z $rc ]] || echo "Now using node $REPLY"
+  elif [[ -n $rc ]]; then
+    nvm install
+  else
     nvm use default
   fi
 }
 
 add-zsh-hook chpwd load-nvmrc
-load-nvmrc
+load-nvmrc init
 
 [ -f ~/projects/ai/gwt/gwt.plugin.zsh ] && source ~/projects/ai/gwt/gwt.plugin.zsh
+
+# OpenClaw Completion
+source "/home/arthur/.openclaw/completions/openclaw.zsh"
+
+# opencode
+export PATH=/home/arthur/.opencode/bin:$PATH
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/arthur/.local/bin:$PATH"
