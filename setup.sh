@@ -124,7 +124,6 @@ declare -A FILES_TO_SYMLINK=(
   ['.gitconfig']='git/gitconfig'
   ['.gitignore']='git/gitignore'
   ['.zshrc']='zsh/zshrc'
-  ['.config/terminator/config']='terminator/config'
   ['.vimrc']='vim/vimrc'
   ['.tmux.conf']='tmux/tmux.conf'
   ['.mozilla/firefox/*default*/']='firefox/user.js'

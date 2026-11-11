@@ -1,3 +1,6 @@
-git/gitconfig.local
+git/gitconfig.*
+!git/gitconfig.*.dist
 zsh/zshrc.local
 scripts/cobrowser
+scripts/private/
+__pycache__/
